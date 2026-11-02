@@ -10,10 +10,32 @@
           <!--sign up form-->
           <h2>New User Signup!</h2>
           <form method="POST" action="/register" enctype="multipart/form-data">
-            <input type="text" name="name" placeholder="Name" />
-            <input type="email" name="email" placeholder="Email Address" />
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value="{{name}}"
+            />
+            {% if errors.name %}
+            <p style="color: red">{{ errors.name }}</p>
+            {% endif %}
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              value="{{email}}"
+            />
+            {% if errors.email %}
+            <p style="color: red">{{ errors.email }}</p>
+            {% endif %}
             <input type="password" name="password" placeholder="Password" />
+            {% if errors.password %}
+            <p style="color: red">{{ errors.password }}</p>
+            {% endif %}
             <input type="file" name="avatar" />
+            {% if errors.avatar %}
+            <p style="color: red">{{ errors.avatar }}</p>
+            {% endif %}
             <button type="submit" class="btn btn-default">Signup</button>
           </form>
         </div>

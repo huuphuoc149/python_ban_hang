@@ -9,9 +9,23 @@
         <div class="login-form">
           <!--login form-->
           <h2>Login to your account</h2>
-          <form action="#">
-            <input type="text" placeholder="Name" />
-            <input type="email" placeholder="Email Address" />
+          <form action="/login" method="POST">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value="{{email}}"
+            />
+            {% if errors.email %}
+            <p style="color: red">{{ errors.email }}</p>
+            {% endif %}
+            <input type="password" name="password" placeholder="Password" />
+            {% if errors.password %}
+            <p style="color: red">{{ errors.password }}</p>
+            {% endif %} {% if errors.login %}
+            <!--lỗi chung "Email hoặc mật khẩu sai" -->
+            <p style="color: red">{{ errors.login }}</p>
+            {% endif %}
             <span>
               <input type="checkbox" class="checkbox" />
               Keep me signed in

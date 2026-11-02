@@ -29,9 +29,8 @@ def handle_file_upload(file):
     # Trả về dict để nơi gọi biết vừa thành công hay thất bại, vừa có câu báo lỗi
     result = {"success": False, "error": None}
 
-    if (
-        file.filename == ""
-    ):  # không chọn file thì trình duyệt vẫn gửi lên, nhưng tên rỗng
+    # không chọn file thì trình duyệt vẫn gửi lên, nhưng tên rỗng
+    if file.filename == "":
         result["error"] = "Vui lòng chọn 1 file"
         return result
     if not allowed_file(file.filename):
@@ -51,11 +50,10 @@ def handle_file_upload(file):
     return result
 
 
-@register_bp.route(
-    "/register", methods=["GET", "POST"]
-)  # GET: mở form; POST: bấm Signup
+# GET: mở form; POST: bấm Signup
+@register_bp.route("/register", methods=["GET", "POST"])
 def register():
-    # Khai báo trước để lần GET vẫn có biến gửi sang HTML, không bị lỗi "chưa định nghĩa"
+    # Khai báo trước để lần GET vẫn có biến gửi sang HTML, không bị lỗi
     errors = {}
     name = ""
     email = ""
@@ -65,8 +63,8 @@ def register():
         # Lấy data từ form
         # strip(): bỏ khoảng trắng 2 đầu, chỉ gõ dấu cách cũng tính là trống
         name = request.form["name"].strip()
-        # không strip: dấu cách có thể là một phần mật khẩu
         email = request.form["email"].strip()
+        # không strip: dấu cách có thể là một phần mật khẩu
         password = request.form["password"]
         avatar = request.files["avatar"]
 
