@@ -89,9 +89,14 @@
         <div class="col-md-8 clearfix">
           <div class="shop-menu clearfix pull-right">
             <ul class="nav navbar-nav">
+              {% if session.get("user_id")%}
               <li>
-                <a href=""><i class="fa fa-user"></i> Account</a>
+                <a href="/account"><i class="fa fa-user"></i> Account</a>
               </li>
+              <li>
+                <a href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+              </li>
+              {% endif %}
               <li>
                 <a href=""><i class="fa fa-star"></i> Wishlist</a>
               </li>
@@ -101,18 +106,20 @@
                 >
               </li>
               <li>
-                <a id="icon_cart" href="cart.html"
+                <a id="icon_cart" href="/show_cart"
                   ><i class="fa fa-shopping-cart"></i>
                   Cart
                   <span id="cart_count">0</span></a
                 >
               </li>
+              {% if not session.get("user_id")%}
               <li>
                 <a href="/login"><i class="fa fa-lock"></i> Login</a>
               </li>
               <li>
                 <a href="/register"><i class="fa fa-lock"></i> Register</a>
               </li>
+              {% endif %}
             </ul>
           </div>
         </div>

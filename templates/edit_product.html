@@ -1,0 +1,73 @@
+{% extends "layout/main.html" %} {% block content %}
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="left-sidebar">
+          <h2>Account</h2>
+          <div class="panel-group category-products" id="accordian">
+            <!--category-productsr-->
+
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title"><a href="/account">Account</a></h4>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a href="/my_product">My product</a>
+                </h4>
+              </div>
+            </div>
+          </div>
+          <!--/category-products-->
+        </div>
+      </div>
+      <div class="col-sm-9">
+        <div class="blog-post-area">
+          <h2 class="title text-center">Edit Product</h2>
+          <div class="signup-form">
+            <h2>Thông tin sản phẩm</h2>
+            <form
+              action="/edit_product/{{product.id}}"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <input
+                type="text"
+                name="title"
+                placeholder="Tên sản phẩm"
+                value="{{product.title}}"
+              />
+              {% if errors.title %}
+              <p style="color: red">{{ errors.title }}</p>
+              {% endif %}
+              <input
+                type="number"
+                name="price"
+                placeholder="Giá tiền"
+                value="{{product.price}}"
+              />
+              {% if errors.price %}
+              <p style="color: red">{{ errors.price }}</p>
+              {% endif %}
+              <img
+                src="/static/uploads/{{ product.image }}"
+                alt="{{ product.title }}"
+                width="100"
+              />
+              <p>Để trống nếu kh muốn đổi ảnh</p>
+              <input type="file" name="image" />
+              {% if errors.image %}
+              <p style="color: red">{{ errors.image }}</p>
+              {% endif %}
+              <button type="submit" class="btn btn-default">Update</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "layout/main.html" %} {% block content %}
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="left-sidebar">
+          <h2>Account</h2>
+          <div class="panel-group category-products" id="accordian">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title"><a href="/account">Account</a></h4>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a href="/my_product">My product</a>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-9">
+        <div class="blog-post-area">
+          <h2 class="title text-center">My product</h2>
+
+          <p><a href="/add_product" class="btn btn-default">Add product</a></p>
+
+          {% if not products %}
+
+          <p>Không có product nào.</p>
+          {% else %}
+          <table class="table table-bordered">
+            <tr>
+              <th>Ảnh</th>
+              <th>Title</th>
+              <th>Price</th>
+              <th>Thao tác</th>
+            </tr>
+            {% for p in products %}
+            <tr>
+              <!-- Database chỉ lưu tên file, nên ghép thêm đường dẫn thư mục ảnh -->
+              <td>
+                <img
+                  src="/static/uploads/{{ p.image }}"
+                  alt="{{ p.title }}"
+                  width="100"
+                />
+              </td>
+              <td>{{ p.title }}</td>
+              <td>{{ p.price }}</td>
+              <td>
+                <!-- p.id gắn vào link để trang sửa/xóa biết đúng sản phẩm nào -->
+                <a href="/edit_product/{{ p.id }}">Edit</a> |
+                <form
+                  action="/delete_product/{{ p.id }}"
+                  method="POST"
+                  style="display: inline"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-link"
+                    style="padding: 0"
+                    onclick="return confirm('Xóa sản phẩm này?');"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

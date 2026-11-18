@@ -1,0 +1,145 @@
+{% extends "layout/main.html" %} {% block content %}
+<section id="cart_items">
+  <div class="container">
+    <div class="breadcrumbs">
+      <ol class="breadcrumb">
+        <li><a href="/">Home</a></li>
+        <li class="active">Shopping Cart</li>
+      </ol>
+    </div>
+    <div class="table-responsive cart_info">
+      <table class="table table-condensed">
+        <thead>
+          <tr class="cart_menu">
+            <td class="image">Item</td>
+            <td class="description"></td>
+            <td class="price">Price</td>
+            <td class="quantity">Quantity</td>
+            <td class="total">Total</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr id="{{p.id}}">
+            <td class="cart_product">
+              <img width="120" src="/static/uploads/{{p.image}}" />
+            </td>
+            <td class="cart_description">
+              <h4 style="text-align: left"><a>{{p.title}}</a></h4>
+              <p>ID: {{p.id}}</p>
+            </td>
+            <td class="cart_price">
+              <p>{{p.price}}</p>
+            </td>
+            <td class="cart_quantity">
+              <div class="cart_quantity_button">
+                <a class="cart_quantity_up"> + </a>
+                <input
+                  class="cart_quantity_input"
+                  type="text"
+                  name="quantity"
+                  value="{{p.qty}}"
+                  autocomplete="off"
+                  size="2"
+                />
+                <a class="cart_quantity_down"> - </a>
+              </div>
+            </td>
+            <td class="cart_total">
+              <p class="cart_total_price">{{p.price * p.qty}}</p>
+            </td>
+            <td class="cart_delete">
+              <a class="cart_quantity_delete"><i class="fa fa-times"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<!--/#cart_items-->
+<script>
+  let congqty = document.querySelectorAll(".cart_quantity_up");
+  congqty.forEach(function (cong) {
+    cong.addEventListener("click", async function () {
+      let tr = this.closest("tr");
+      let productId = tr.id;
+      // console.log("ID cộng", productId);
+      let inputQty = tr.querySelector(".cart_quantity_input");
+      let qty = Number(inputQty.value);
+      qty = qty + 1;
+      inputQty.value = qty;
+
+      let priceText = tr.querySelector(".cart_price p").textContent;
+      let price = Number(priceText.replace("$", ""));
+      let total = price * qty;
+      tr.querySelector(".cart_total_price").textContent = total;
+      // Gửi ngầm (AJAX) sang Python để lưu qty mới vào session; await = chờ Python trả lời xong
+      const response = await fetch("/update_cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, // báo cho Flask: dữ liệu gửi lên là JSON
+        // Đổi object thành chuỗi JSON để gửi: id = món nào (Python đọc .get("id")),
+        // action = làm gì ("increase" khớp if action == "increase" bên Python)
+        body: JSON.stringify({ id: productId, action: "increase" }),
+      });
+      //   đổi chuỗi JSON Python gửi về thành object JS → {status: "success"}
+      const data = await response.json();
+      console.log(data);
+    });
+  });
+  let truqty = document.querySelectorAll(".cart_quantity_down");
+  truqty.forEach(function (tru) {
+    tru.addEventListener("click", async function () {
+      let tr = this.closest("tr");
+      let productId = tr.id;
+      // console.log("ID trừ", productId);
+      let inputQty = tr.querySelector(".cart_quantity_input");
+      let qty = Number(inputQty.value);
+      if (qty <= 1) {
+        alert("Không được xóa product cuối cùng");
+        return;
+      }
+      qty = qty - 1;
+      inputQty.value = qty;
+
+      let priceText = tr.querySelector(".cart_price p").textContent;
+      let price = Number(priceText.replace("$", ""));
+      let total = price * qty;
+      tr.querySelector(".cart_total_price").textContent = total;
+      // Gửi ngầm (AJAX) sang Python để lưu qty mới vào session; await = chờ Python trả lời xong
+      const response = await fetch("/update_cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, // báo cho Flask: dữ liệu gửi lên là JSON
+        // Đổi object thành chuỗi JSON để gửi: id = món nào (Python đọc .get("id")),
+        // action = làm gì ("decrease" khớp elif action == "decrease" bên Python)
+        body: JSON.stringify({ id: productId, action: "decrease" }),
+      });
+      //   đổi chuỗi JSON Python gửi về thành object JS → {status: "success"}
+      const data = await response.json();
+      console.log(data);
+    });
+  });
+  let xoaqty = document.querySelectorAll(".cart_quantity_delete");
+  xoaqty.forEach(function (xoa) {
+    xoa.addEventListener("click", async function () {
+      let tr = this.closest("tr");
+      let productId = tr.id;
+      // console.log("ID xóa", productId);
+      tr.remove();
+      // Gửi ngầm (AJAX) sang Python để lưu qty mới vào session; await = chờ Python trả lời xong
+      const response = await fetch("/update_cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, // báo cho Flask: dữ liệu gửi lên là JSON
+        // Đổi object thành chuỗi JSON để gửi: id = món nào (Python đọc .get("id")),
+        // action = làm gì ("delete" khớp if action == "delete" bên Python)
+        body: JSON.stringify({ id: productId, action: "delete" }),
+      });
+      //   đổi chuỗi JSON Python gửi về thành object JS → {status: "success"}
+      const data = await response.json();
+      console.log(data);
+    });
+  });
+</script>
+{% endblock %}
