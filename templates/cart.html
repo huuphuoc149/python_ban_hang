@@ -60,6 +60,86 @@
   </div>
 </section>
 <!--/#cart_items-->
+<section id="do_action">
+  <div class="container">
+    <div class="heading">
+      <h3>What would you like to do next?</h3>
+      <p>
+        Choose if you have a discount code or reward points you want to use or
+        would like to estimate your delivery cost.
+      </p>
+    </div>
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="chose_area">
+          <ul class="user_option">
+            <li>
+              <input type="checkbox" />
+              <label>Use Coupon Code</label>
+            </li>
+            <li>
+              <input type="checkbox" />
+              <label>Use Gift Voucher</label>
+            </li>
+            <li>
+              <input type="checkbox" />
+              <label>Estimate Shipping & Taxes</label>
+            </li>
+          </ul>
+          <ul class="user_info">
+            <li class="single_field">
+              <label>Country:</label>
+              <select>
+                <option>United States</option>
+                <option>Bangladesh</option>
+                <option>UK</option>
+                <option>India</option>
+                <option>Pakistan</option>
+                <option>Ucrane</option>
+                <option>Canada</option>
+                <option>Dubai</option>
+              </select>
+            </li>
+            <li class="single_field">
+              <label>Region / State:</label>
+              <select>
+                <option>Select</option>
+                <option>Dhaka</option>
+                <option>London</option>
+                <option>Dillih</option>
+                <option>Lahore</option>
+                <option>Alaska</option>
+                <option>Canada</option>
+                <option>Dubai</option>
+              </select>
+            </li>
+            <li class="single_field zip-field">
+              <label>Zip Code:</label>
+              <input type="text" />
+            </li>
+          </ul>
+          <a class="btn btn-default update" href="">Get Quotes</a>
+          <a class="btn btn-default check_out" href="">Continue</a>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="total_area">
+          <ul>
+            <!-- Thêm id = sub_total để ghi tổng tiền các món -->
+            <li>Cart Sub Total <span id="sub_total">${{sub_total}}</span></li>
+            <li>Eco Tax <span>$0</span></li>
+            <li>Shipping Cost <span>Free</span></li>
+            <!-- thêm id="grand_total" để ghi tổng cuối -->
+            <li>Total <span id="grand_total">${{sub_total}}</span></li>
+          </ul>
+          <a class="btn btn-default update" href="">Update</a>
+          <a class="btn btn-default check_out" href="">Check Out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--/#do_action-->
 <script>
   let congqty = document.querySelectorAll(".cart_quantity_up");
   congqty.forEach(function (cong) {
@@ -76,6 +156,8 @@
       let price = Number(priceText.replace("$", ""));
       let total = price * qty;
       tr.querySelector(".cart_total_price").textContent = total;
+      // cộng lại tổng sau khi ô Total của dòng đã đổi
+      tinhtongLon();
       // Gửi ngầm (AJAX) sang Python để lưu qty mới vào session; await = chờ Python trả lời xong
       const response = await fetch("/update_cart", {
         method: "POST",
@@ -87,6 +169,12 @@
       //   đổi chuỗi JSON Python gửi về thành object JS → {status: "success"}
       const data = await response.json();
       console.log(data);
+      // Python đã tính lại tổng (update_cart.py) → JS ghi lên header; về 0 thì để trống (giống header lúc tải lại)
+      if (data.cart_count > 0) {
+        document.querySelector("#cart_count").textContent = data.cart_count;
+      } else {
+        document.querySelector("#cart_count").textContent = "";
+      }
     });
   });
   let truqty = document.querySelectorAll(".cart_quantity_down");
@@ -108,6 +196,8 @@
       let price = Number(priceText.replace("$", ""));
       let total = price * qty;
       tr.querySelector(".cart_total_price").textContent = total;
+      // cộng lại tổng tiền sau khi ô Total của dòng đã đổi
+      tinhtongLon();
       // Gửi ngầm (AJAX) sang Python để lưu qty mới vào session; await = chờ Python trả lời xong
       const response = await fetch("/update_cart", {
         method: "POST",
@@ -116,11 +206,18 @@
         // action = làm gì ("decrease" khớp elif action == "decrease" bên Python)
         body: JSON.stringify({ id: productId, action: "decrease" }),
       });
-      //   đổi chuỗi JSON Python gửi về thành object JS → {status: "success"}
+      // đổi chuỗi JSON Python gửi về thành object JS → {status: "success", "cart_count": cart_count}
       const data = await response.json();
       console.log(data);
+      // Python đã tính lại tổng (update_cart.py) → JS ghi lên header; về 0 thì để trống (giống header lúc tải lại)
+      if (data.cart_count > 0) {
+        document.querySelector("#cart_count").textContent = data.cart_count;
+      } else {
+        document.querySelector("#cart_count").textContent = "";
+      }
     });
   });
+
   let xoaqty = document.querySelectorAll(".cart_quantity_delete");
   xoaqty.forEach(function (xoa) {
     xoa.addEventListener("click", async function () {
@@ -128,18 +225,46 @@
       let productId = tr.id;
       // console.log("ID xóa", productId);
       tr.remove();
-      // Gửi ngầm (AJAX) sang Python để lưu qty mới vào session; await = chờ Python trả lời xong
+      // cộng lại tổng tiền sau khi dòng đã bị xóa khỏi bảng
+      tinhtongLon();
+
+      // Gửi ngầm (AJAX) sang Python để xóa món này khỏi session; await = chờ Python trả lời xong
       const response = await fetch("/update_cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" }, // báo cho Flask: dữ liệu gửi lên là JSON
         // Đổi object thành chuỗi JSON để gửi: id = món nào (Python đọc .get("id")),
-        // action = làm gì ("delete" khớp if action == "delete" bên Python)
+        // action = làm gì ("delete" khớp elif action == "delete" bên Python)
         body: JSON.stringify({ id: productId, action: "delete" }),
       });
-      //   đổi chuỗi JSON Python gửi về thành object JS → {status: "success"}
+      // đổi chuỗi JSON Python gửi về thành object JS → {"status": "success", "cart_count": cart_count}
       const data = await response.json();
       console.log(data);
+      // Python đã tính lại tổng (update_cart.py) → JS ghi lên header; về 0 thì để trống (giống header lúc tải lại)
+      if (data.cart_count > 0) {
+        document.querySelector("#cart_count").textContent = data.cart_count;
+      } else {
+        document.querySelector("#cart_count").textContent = "";
+      }
     });
   });
+  // Cộng lại cột Total của MỌI dòng rồi ghi xuống khối tổng (gọi khi bấm + / −)
+  // Đặt ngoài 3 nút để nút nào cũng gọi được. Hàm viết bằng "function" nên gọi trước (dòng 160) vẫn chạy
+  function tinhtongLon() {
+    // lấy ô Total của tất cả dòng
+    let total = document.querySelectorAll(".cart_total_price");
+    console.log("Danh sách ", total);
+    // bắt đầu từ 0, giống sub_total = 0 bên show_cart.py
+    let sum = 0;
+    // Duyệt HẾT các ô, không break: cần cộng tất cả
+    total.forEach(function (tong) {
+      console.log("Đang duyệt ", tong);
+      let value = Number(tong.textContent);
+      sum = sum + value;
+    });
+    // Ghi tổng lên trang (textContent giống dòng 158)
+    // Total = Sub Total vì chưa tính thuế (Eco Tax $0 thay vì 2 như cũ)
+    document.getElementById("sub_total").textContent = "$" + sum;
+    document.getElementById("grand_total").textContent = "$" + sum;
+  }
 </script>
 {% endblock %}

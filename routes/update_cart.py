@@ -26,5 +26,11 @@ def update_cart():
             break
     # Gán lại giỏ vào session để Flask lưu
     session["cart"] = cart
+    # Cộng lại tổng số lượng sau khi tăng/giảm/xóa; đặt sau khi lưu giỏ để đếm đúng số mới
+    cart_count = 0
+    for item in cart:
+        cart_count += item["qty"]  # không break: phải cộng HẾT các món
+    # Cất tổng vào session → lúc tải lại trang header kiểm tra có thì hiển thị
+    session["cart_count"] = cart_count
     # Báo cho JS biết đã cập nhật xong
-    return jsonify({"status": "success"})
+    return jsonify({"status": "success", "cart_count": cart_count})

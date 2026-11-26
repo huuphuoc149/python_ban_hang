@@ -898,17 +898,14 @@
 
       console.log(data);
 
-      // Chỉ cập nhật khi Python báo thành công; "fail" (không có sản phẩm) thì không có giỏ để đọc
+      // Chỉ cập nhật khi Python báo thành công; "fail" (không có sản phẩm) thì không có cart_count để đọc
       if (data.status === "success") {
-        // Biến cộng dồn tổng số lượng, bắt đầu từ 0
-        let total = 0;
-        // Duyệt từng món trong giỏ (Python gửi giỏ về trong khóa "product")
-        for (const item of data.product) {
-          // cộng số lượng của món này vào tổng
-          total += item.qty;
-        }
-        // Tìm thẻ id="cart_count" ở header (dấu # = tìm theo id), thay số bên trong bằng tổng
-        document.querySelector("#cart_count").textContent = total;
+        // Python đã tính tổng (add_to_cart.py) → JS chỉ ghi vào thẻ id="cart_count" ở header
+        document.querySelector("#cart_count").textContent = data.cart_count;
+        alert("Đã thêm vào giỏ hàng"); // MỚI: thành công → báo (thay cho success của jQuery)
+      } else {
+        // status "fail" (vd không tìm thấy sản phẩm)
+        alert(data.message); // hiện câu lỗi Python gửi về (thay cho error của jQuery)
       }
     });
   }

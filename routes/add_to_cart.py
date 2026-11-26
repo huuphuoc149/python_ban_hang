@@ -48,6 +48,18 @@ def add_to_cart():
     # (chỉ sửa qty bên trong mà không gán lại thì Flask có thể không lưu)
 
     session["cart"] = cart
-
+    # Cộng tổng số lượng các món; đặt sau khi lưu giỏ để đếm cả món vừa thêm
+    cart_count = 0
+    for item in cart:
+        cart_count += item["qty"]  # không break: phải cộng HẾT các món
+    # Cất tổng vào session → lúc tải lại trang header kiểm tra có thì hiển thị
+    session["cart_count"] = cart_count
+    # "product" = tên khóa tự đặt (theo cur.fetchone ở trên), chứa cả giỏ; "cart_count" để JS hiển thị lên header
     # trả JSON báo thành công kèm cả giỏ hàng → JS nhận ở await response.json()
-    return jsonify({"status": "success", "product": session["cart"]})
+    return jsonify(
+        {
+            "status": "success",
+            "product": session["cart"],
+            "cart_count": cart_count,
+        }
+    )
